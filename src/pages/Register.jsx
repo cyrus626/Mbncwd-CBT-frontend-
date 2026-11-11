@@ -8,7 +8,7 @@ export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
-  const [form, setForm] = useState({ name: "", email: "", password: "", course_id: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "", course_id: "", code: "" });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -51,6 +51,10 @@ export default function Register() {
             {courses.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </label>
+        <div>
+          <Field label="Course access code" required minLength={4} autoComplete="off" placeholder="e.g. K7QM-2XHP" value={form.code} onChange={set("code")} />
+          <p className="mt-1 text-xs text-slate-500">Ask your administrator or instructor for the code for this course.</p>
+        </div>
         <Button className="w-full" disabled={busy}>{busy ? "Creating…" : "Create account"}</Button>
       </form>
       <p className="mt-6 text-center text-sm text-slate-500">

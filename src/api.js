@@ -1,10 +1,13 @@
 const BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export class ApiError extends Error {
-  constructor(message, status, errors) {
+  // extra: { errors, problems, attemptId } copied from the backend's error body
+  constructor(message, status, extra = {}) {
     super(message);
     this.status = status;
-    this.errors = errors || [];
+    this.errors = extra.errors || []; // import rows: [{ row, message }]
+    this.problems = extra.problems || []; // publish/update problems: ["reason", ...]
+    this.attemptId = extra.attemptId ?? null; // sent with "time is up" / "already finished" (409)
   }
 }
 
@@ -14,7 +17,8 @@ function parseDetail(data) {
   const d = data?.detail;
   if (typeof d === "string") return { message: d };
   if (Array.isArray(d)) return { message: d.map((e) => e.msg?.replace("Value error, ", "")).join(". ") };
-  if (d && typeof d === "object") return { message: d.message || "Request failed", errors: d.errors };
+  if (d && typeof d === "object")
+    return { message: d.message || "Request failed", errors: d.errors, problems: d.problems, attemptId: d.attempt_id };
   return { message: "Something went wrong" };
 }
 
@@ -39,13 +43,13 @@ export async function api(path, { method = "GET", body, form, raw = false } = {}
 
   if (!res.ok) {
     const data = await res.json().catch(() => null);
-    const { message, errors } = parseDetail(data);
+    const { message, errors, problems, attemptId } = parseDetail(data);
     if (res.status === 401 && token && !path.startsWith("/auth/login")) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       window.location.href = "/login";
     }
-    throw new ApiError(message, res.status, errors);
+    throw new ApiError(message, res.status, { errors, problems, attemptId });
   }
   if (res.status === 204) return null;
   return raw ? res : res.json();

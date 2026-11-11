@@ -8,6 +8,8 @@ import TakeTest from "./pages/participant/TakeTest.jsx";
 import Result from "./pages/participant/Result.jsx";
 import AdminTests from "./pages/admin/AdminTests.jsx";
 import AdminTestDetail from "./pages/admin/AdminTestDetail.jsx";
+import AdminCourses from "./pages/admin/AdminCourses.jsx";
+import Account from "./pages/Account.jsx";
 
 function Protected({ role, wide, children }) {
   const { user } = useAuth();
@@ -35,6 +37,9 @@ export default function App() {
 
       <Route path="/admin" element={<Protected role="admin" wide><AdminTests /></Protected>} />
       <Route path="/admin/tests/:testId" element={<Protected role="admin" wide><AdminTestDetail /></Protected>} />
+      <Route path="/courses" element={<Protected role="admin" wide><AdminCourses /></Protected>} />
+
+      <Route path="/account" element={<Protected><Account /></Protected>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

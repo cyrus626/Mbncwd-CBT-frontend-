@@ -57,6 +57,15 @@ export function Spinner() {
 export const fmtDate = (d) =>
   d ? new Date(d).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" }) : "—";
 
+// <input type="datetime-local"> works in local time without a zone; the API wants UTC (ISO, ending in Z)
+export const toIso = (v) => (v ? new Date(v).toISOString() : null);
+export const toLocalInput = (iso) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+};
+
 export function Logo({ light = false }) {
   return (
     <div className="flex items-center gap-3">
@@ -89,10 +98,14 @@ export function Layout({ children, wide = false }) {
           <Link to="/"><Logo light /></Link>
           <nav className="flex items-center gap-1">
             {user?.role === "admin" ? (
-              <NavLink to="/admin" className={link}>Tests</NavLink>
+              <>
+                <NavLink to="/admin" className={link}>Tests</NavLink>
+                <NavLink to="/courses" className={link}>Courses</NavLink>
+              </>
             ) : (
               <NavLink to="/tests" className={link}>My Tests</NavLink>
             )}
+            <NavLink to="/account" className={link}>Account</NavLink>
             <span className="mx-2 hidden text-sm text-brand-100 sm:inline">{user?.name}</span>
             <button
               onClick={() => { logout(); navigate("/login"); }}
